@@ -1,0 +1,8 @@
+name = "clawtner"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "CLAWTNER_DB"
+database_name = "clawtner-db"
+database_id = "" # fill after running: npm run db:create

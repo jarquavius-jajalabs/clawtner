@@ -1,0 +1,45 @@
+{
+  "name": "clawtner",
+  "version": "0.1.0",
+  "description": "Agent-agnostic relationship message queue with human-in-the-loop approval",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev --d1 CLAWTNER_DB=clawtner-db -- npx vite",
+    "build": "vite build",
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "db:create": "wrangler d1 create clawtner-db",
+    "db:migrate": "wrangler d1 execute clawtner-db --file=./migrations/001_init.sql",
+    "db:migrate:local": "wrangler d1 execute clawtner-db --file=./migrations/001_init.sql --local"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "relationship",
+    "messaging",
+    "openclaw"
+  ],
+  "author": "jajaLabs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jajalabs/clawtner.git"
+  },
+  "main": "index.js",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jajalabs/clawtner/issues"
+  },
+  "homepage": "https://github.com/jajalabs/clawtner#readme",
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.1.4",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "vite": "^7.3.1",
+    "wrangler": "^4.69.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
+  }
+}
