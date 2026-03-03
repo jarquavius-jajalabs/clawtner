@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Contact } from '../lib/types';
 import * as api from '../lib/api';
+import ContactDetail from './ContactDetail';
 
 export default function Contacts() {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selected, setSelected] = useState<Contact | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
   const [form, setForm] = useState({
@@ -26,7 +28,8 @@ export default function Contacts() {
     setShowForm(false);
   }
 
-  function editContact(c: Contact) {
+  function editContact(e: React.MouseEvent, c: Contact) {
+    e.stopPropagation();
     setForm({
       name: c.name, phone: c.phone || '', email: c.email || '',
       relationship: c.relationship || '', tone: c.tone || '',
@@ -49,11 +52,16 @@ export default function Contacts() {
     load();
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(e: React.MouseEvent, id: string) {
+    e.stopPropagation();
     if (confirm('Delete this contact?')) {
       await api.deleteContact(id);
       load();
     }
+  }
+
+  if (selected) {
+    return <ContactDetail contact={selected} onBack={() => { setSelected(null); load(); }} />;
   }
 
   return (
@@ -99,16 +107,17 @@ export default function Contacts() {
 
       <div className="contact-list">
         {contacts.map((c) => (
-          <div className="contact-card" key={c.id}>
+          <div className="contact-card clickable" key={c.id} onClick={() => setSelected(c)}>
+            <div className="contact-avatar">{c.name.charAt(0).toUpperCase()}</div>
             <div className="contact-info">
               <strong>{c.name}</strong>
               {c.relationship && <span className="badge">{c.relationship}</span>}
-              {c.phone && <div className="contact-detail">{c.phone}</div>}
-              {c.city && <div className="contact-detail">{c.city}, {c.state} {c.zip}</div>}
+              {c.phone && <div className="contact-detail-text">{c.phone}</div>}
+              {c.city && <div className="contact-detail-text">{c.city}, {c.state}</div>}
             </div>
             <div className="contact-actions">
-              <button onClick={() => editContact(c)}>Edit</button>
-              <button className="btn-danger" onClick={() => handleDelete(c.id)}>×</button>
+              <button onClick={(e) => editContact(e, c)}>Edit</button>
+              <button className="btn-danger" onClick={(e) => handleDelete(e, c.id)}>×</button>
             </div>
           </div>
         ))}
