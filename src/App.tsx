@@ -10,9 +10,11 @@ import Settings from './components/Settings';
 function LoginScreen() {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
     try {
       const res = await api.login(pin);
       if (res.token) {
@@ -24,6 +26,29 @@ function LoginScreen() {
     } catch {
       setError('Connection failed');
     }
+    setLoading(false);
+  }
+
+  async function handleDemo() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/demo', { method: 'POST' });
+      const data = await res.json();
+      if (data.token) {
+        api.setToken(data.token);
+        // Seed demo data
+        await fetch('/api/seed', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer demo' },
+        });
+        window.location.reload();
+      } else {
+        setError('Demo mode not available');
+      }
+    } catch {
+      setError('Connection failed');
+    }
+    setLoading(false);
   }
 
   return (
@@ -43,8 +68,11 @@ function LoginScreen() {
             placeholder="••••••"
           />
           {error && <div className="error">{error}</div>}
-          <button type="submit" className="btn-primary">Unlock</button>
+          <button type="submit" className="btn-primary" disabled={loading}>Unlock</button>
         </form>
+        <button className="btn-demo" onClick={handleDemo} disabled={loading}>
+          {loading ? 'Loading...' : 'Try Demo'}
+        </button>
       </div>
     </div>
   );

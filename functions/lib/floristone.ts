@@ -26,7 +26,7 @@ export async function getProducts(apiKey?: string): Promise<FlowerProduct[]> {
       name: 'Classic Dozen Red Roses',
       price: 59.99,
       description: 'A timeless arrangement of 12 premium long-stem red roses with baby\'s breath and greenery.',
-      image: 'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=400',
+      image: 'https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=400',
       category: 'Roses',
     },
     {
@@ -42,7 +42,7 @@ export async function getProducts(apiKey?: string): Promise<FlowerProduct[]> {
       name: 'Sunshine Sunflowers',
       price: 39.99,
       description: 'Bright and cheerful sunflower bouquet that brings warmth to any room.',
-      image: 'https://images.unsplash.com/photo-1551927336-09d50efd69cd?w=400',
+      image: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=400',
       category: 'Sunflowers',
     },
     {
@@ -50,7 +50,7 @@ export async function getProducts(apiKey?: string): Promise<FlowerProduct[]> {
       name: 'Elegant Orchid Plant',
       price: 64.99,
       description: 'A stunning potted orchid plant that lasts for weeks.',
-      image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?w=400',
+      image: 'https://images.unsplash.com/photo-1566873535350-a3f5d4a804b7?w=400',
       category: 'Plants',
     },
     {
@@ -74,7 +74,7 @@ export async function getProducts(apiKey?: string): Promise<FlowerProduct[]> {
       name: 'Pure White Lilies',
       price: 49.99,
       description: 'Elegant white lilies symbolizing devotion and purity.',
-      image: 'https://images.unsplash.com/photo-1533616688419-b7a585564566?w=400',
+      image: 'https://images.unsplash.com/photo-1606567595334-d39972c85dbe?w=400',
       category: 'Lilies',
     },
     {
@@ -82,7 +82,7 @@ export async function getProducts(apiKey?: string): Promise<FlowerProduct[]> {
       name: 'Succulent Garden Box',
       price: 42.99,
       description: 'A curated box of assorted succulents in a wooden planter.',
-      image: 'https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=400',
+      image: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=400',
       category: 'Plants',
     },
   ];
