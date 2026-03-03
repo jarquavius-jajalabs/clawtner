@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "CLAWTNER_DB"
 database_name = "clawtner-db"
-database_id = "" # fill after running: npm run db:create
+database_id = "9711f9df-8d6d-4200-82a2-324653b82259"

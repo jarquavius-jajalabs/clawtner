@@ -1,11 +1,11 @@
 {
   "name": "Clawtner",
   "short_name": "Clawtner",
-  "description": "AI relationship assistant with human-in-the-loop",
+  "description": "Approve messages from your AI. Nothing sends without you.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e8a87c",
   "icons": [
     {
       "src": "/icon-192.png",
