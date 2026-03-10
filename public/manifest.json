@@ -4,8 +4,8 @@
   "description": "Approve messages from your AI. Nothing sends without you.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFF5F7",
-  "theme_color": "#E8527A",
+  "background_color": "#F7F8FA",
+  "theme_color": "#4F6AE8",
   "icons": [
     {
       "src": "/icon-192.png",

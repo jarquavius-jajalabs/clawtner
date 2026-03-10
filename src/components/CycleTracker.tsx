@@ -22,12 +22,19 @@ interface PhaseData {
   mood: string;
   energy: string;
   partnerTip: string;
+  biochem: {
+    summary: string;
+    hormones: { name: string; level: string; role: string }[];
+    whatsHappening: string;
+    neurotransmitters: string;
+    keyMetabolism: string;
+  };
 }
 
 const PHASES: PhaseData[] = [
   {
     key: 'menstrual', label: 'Menstrual', days: 'Days 1-5',
-    color: '#E8A0BF', colorSoft: 'rgba(232, 160, 191, 0.15)',
+    color: '#C07088', colorSoft: 'rgba(192, 112, 136, 0.12)',
     icon: '🌙',
     exercise: 'Low-intensity: walking, hiking, Pilates, yoga, stretching',
     nutrition: 'Iron-rich foods, vitamins C & K, omega-3 fatty acids. Leafy greens, lean red meats, lentils, citrus, flaxseeds.',
@@ -35,10 +42,23 @@ const PHASES: PhaseData[] = [
     mood: 'May feel tired or emotional',
     energy: 'Low — rest is important',
     partnerTip: 'Be extra gentle and thoughtful. Comfort food, cozy vibes. Warm drinks, blankets, patience.',
+    biochem: {
+      summary: 'The corpus luteum has degenerated. Progesterone and estrogen are at their lowest, triggering the endometrial lining to shed. Prostaglandins drive uterine contractions.',
+      hormones: [
+        { name: 'Estradiol (E2)', level: '30-50 pg/mL (nadir)', role: 'At its lowest point. The drop from luteal phase levels is what triggers menstruation. Receptors in the uterus lose their growth signal.' },
+        { name: 'Progesterone', level: '<1 ng/mL (baseline)', role: 'Withdrawal of progesterone destabilizes the endometrial lining. Spiral arteries constrict, cutting off blood supply to the functional layer.' },
+        { name: 'FSH', level: '3-10 mIU/mL (rising)', role: 'Anterior pituitary begins releasing FSH as inhibin B drops. This starts recruiting a cohort of 6-12 antral follicles in the ovaries.' },
+        { name: 'LH', level: '2-8 mIU/mL (low)', role: 'Baseline pulsatile release from the pituitary. GnRH pulse frequency is slow (~every 90 min), favoring FSH over LH.' },
+        { name: 'Prostaglandins (PGF2α)', level: 'Elevated', role: 'Released from degenerating endometrium. Causes myometrial contractions (cramps). Also triggers local inflammation to facilitate tissue breakdown.' },
+      ],
+      whatsHappening: 'The functional layer of the endometrium (2-5mm thick) is shedding. Matrix metalloproteinases (MMPs) break down the extracellular matrix. Simultaneously, the basal layer begins regeneration via stem cells. Average blood loss is 30-40 mL over 3-5 days.',
+      neurotransmitters: 'Serotonin is at its lowest due to estrogen withdrawal (estrogen upregulates tryptophan hydroxylase). GABA sensitivity drops as progesterone metabolite allopregnanolone clears. This combination explains mood dips and increased pain sensitivity.',
+      keyMetabolism: 'Iron loss averages 12-15 mg per cycle. Ferritin may drop if not replenished. Inflammatory cytokines (IL-1, IL-6, TNF-α) are elevated locally. Basal metabolic rate decreases slightly.',
+    },
   },
   {
     key: 'follicular', label: 'Follicular', days: 'Days 6-14',
-    color: '#7EC8B8', colorSoft: 'rgba(126, 200, 184, 0.15)',
+    color: '#5BA899', colorSoft: 'rgba(91, 168, 153, 0.12)',
     icon: '🌱',
     exercise: 'Challenge yourself: HIIT, strength training, running, cycling',
     nutrition: 'Protein for muscle repair: lean meats, eggs, quinoa, legumes. Fresh fruit, fiber, leafy greens, healthy fats, fermented foods, seeds.',
@@ -46,10 +66,23 @@ const PHASES: PhaseData[] = [
     mood: 'Energy rising, feeling optimistic',
     energy: 'Building — great for new plans',
     partnerTip: 'She\'s feeling social and creative. Plan a date or adventure together.',
+    biochem: {
+      summary: 'FSH drives follicle competition. One dominant follicle emerges by day 7-8 and begins producing large amounts of estradiol. Rising estrogen rebuilds the uterine lining and improves mood, cognition, and energy.',
+      hormones: [
+        { name: 'Estradiol (E2)', level: '50-200 pg/mL → peaks ~300+ pg/mL', role: 'Produced by granulosa cells of the dominant follicle via aromatase conversion of androgens. Drives endometrial proliferation (lining thickens 1-3mm to 8-12mm). Also increases cervical mucus production and upregulates LH receptors on the follicle.' },
+        { name: 'FSH', level: '3-10 mIU/mL (declining)', role: 'Initially drives follicle recruitment, but falls as the dominant follicle produces inhibin B, which suppresses FSH at the pituitary. This "selection" mechanism ensures usually one follicle matures.' },
+        { name: 'LH', level: '5-15 mIU/mL (slowly rising)', role: 'GnRH pulse frequency increases to ~every 60 min, shifting pituitary output toward LH. Theca cells respond by producing androgens (androstenedione) which granulosa cells convert to estradiol.' },
+        { name: 'Inhibin B', level: 'Rising', role: 'Secreted by the dominant follicle. Selectively suppresses FSH (not LH) at the pituitary, causing smaller follicles to undergo atresia. A key part of the single-ovulation mechanism.' },
+        { name: 'Testosterone', level: 'Gradually rising', role: 'Theca cells ramp up androgen production under LH. Mid-follicular T levels contribute to increased libido, confidence, and energy. Peaks just before ovulation.' },
+      ],
+      whatsHappening: 'The dominant follicle grows from ~10mm to ~20mm. Inside, the oocyte completes meiosis I. The endometrium enters the proliferative phase: straight tubular glands, spiral arteries elongate, and the functional layer rebuilds. Cervical mucus transitions from thick/scanty to thin/elastic/clear (Spinnbarkeit).',
+      neurotransmitters: 'Rising estrogen boosts serotonin synthesis, dopamine receptor density, and BDNF (brain-derived neurotrophic factor). This is why cognitive performance, verbal fluency, and mood tend to improve. Endorphin sensitivity also increases, making exercise feel more rewarding.',
+      keyMetabolism: 'Insulin sensitivity is higher in this phase (best time for carb-heavy meals if any). Estrogen promotes fat oxidation and glycogen storage in muscles, supporting athletic performance. Collagen synthesis increases.',
+    },
   },
   {
     key: 'ovulation', label: 'Ovulation', days: 'Days 15-17',
-    color: '#F2C57C', colorSoft: 'rgba(242, 197, 124, 0.15)',
+    color: '#D4A03D', colorSoft: 'rgba(212, 160, 61, 0.12)',
     icon: '☀️',
     exercise: 'Endurance workouts: circuit training, HIIT, dance workouts, boot camp',
     nutrition: 'Lean proteins, antioxidants, magnesium-rich foods, fiber. Berries, dark chocolate, almonds, cruciferous vegetables.',
@@ -57,10 +90,23 @@ const PHASES: PhaseData[] = [
     mood: 'Confident, social, high energy',
     energy: 'Peak energy and libido',
     partnerTip: 'Best time for date nights. Compliments land extra well. Plan something special.',
+    biochem: {
+      summary: 'Estradiol exceeds ~200 pg/mL for 50+ hours, triggering a positive feedback switch at the hypothalamus. This causes the LH surge — a massive 10-20x spike that triggers ovulation within 24-36 hours.',
+      hormones: [
+        { name: 'LH', level: '25-100 mIU/mL (THE SURGE)', role: 'The surge lasts 24-48 hours. It triggers resumption of meiosis II in the oocyte, luteinization of granulosa cells, synthesis of prostaglandins and proteases that weaken the follicle wall, and ultimately follicle rupture. The single most important hormonal event of the cycle.' },
+        { name: 'FSH', level: '10-25 mIU/mL (mid-cycle surge)', role: 'A smaller parallel surge occurs. Helps ensure complete oocyte maturation and expansion of the cumulus oophorus (the cell cloud around the egg that aids in fallopian tube capture).' },
+        { name: 'Estradiol (E2)', level: '300-500 pg/mL → sharp drop', role: 'Peaks just before the LH surge, then drops rapidly as the follicle shifts from estrogen to progesterone production. This is the "positive feedback" trigger — sustained high E2 flips the hypothalamic response from suppressive to stimulatory.' },
+        { name: 'Progesterone', level: '1-3 ng/mL (beginning to rise)', role: 'The periovulatory progesterone rise is critical — it amplifies the LH surge, raises basal body temperature by 0.3-0.5°C, and starts preparing the endometrium for its secretory transformation.' },
+        { name: 'Testosterone', level: 'Peak (~50-70 ng/dL)', role: 'Highest point in the cycle. Drives peak libido, assertiveness, and energy. Rapidly drops after ovulation as theca cells luteinize and shift to progesterone production.' },
+      ],
+      whatsHappening: 'The follicle wall thins via collagenase and plasmin. Ovulation is essentially a controlled inflammatory event — the follicle ruptures and releases the oocyte with its cumulus cells into the peritoneal cavity. Fimbriae of the fallopian tube sweep the oocyte into the ampulla. The collapsed follicle begins transforming into the corpus luteum within hours. Basal body temp rises ~0.3-0.5°C and stays elevated through the luteal phase.',
+      neurotransmitters: 'Peak dopamine and norepinephrine drive the "glow" effect — increased sociability, risk tolerance, and attraction signaling. Oxytocin sensitivity is elevated. Some women experience mittelschmerz (ovulation pain) from peritoneal irritation by follicular fluid.',
+      keyMetabolism: 'Brief inflammatory spike (C-reactive protein may rise). Cervical mucus is at peak fertility — raw egg white consistency, >10cm Spinnbarkeit. Some women notice mild bloating from the fluid shift. Metabolic rate begins to climb.',
+    },
   },
   {
     key: 'luteal', label: 'Luteal', days: 'Days 18-28',
-    color: '#B0A0D4', colorSoft: 'rgba(176, 160, 212, 0.15)',
+    color: '#8B7BBF', colorSoft: 'rgba(139, 123, 191, 0.12)',
     icon: '🍂',
     exercise: 'Scale back gradually: weight training, swimming, yoga, Pilates, walking',
     nutrition: 'Complex carbs, healthy fats, protein. Magnesium, calcium, B vitamins, vitamin D to ease PMS.',
@@ -68,6 +114,19 @@ const PHASES: PhaseData[] = [
     mood: 'Winding down, may feel sensitive',
     energy: 'Declining — cravings may kick in',
     partnerTip: 'Extra patience. Surprise her with her favorite snack or flowers. Cozy night in.',
+    biochem: {
+      summary: 'The corpus luteum is a temporary endocrine organ formed from the ruptured follicle. It produces high levels of progesterone and moderate estradiol to maintain the endometrium. Without hCG from an embryo, it degrades after ~12 days.',
+      hormones: [
+        { name: 'Progesterone', level: '5-20 ng/mL (peak at day 21-23)', role: 'Dominant hormone of this phase. Converts the endometrium from proliferative to secretory: glands become coiled and filled with glycogen, spiral arteries fully develop, and the lining becomes receptive for implantation (the "window of implantation" is days 20-24). Also suppresses GnRH/LH pulsatility to prevent new follicle development.' },
+        { name: 'Estradiol (E2)', level: '100-200 pg/mL (secondary rise)', role: 'The corpus luteum produces a secondary estrogen peak. Works synergistically with progesterone to maintain endometrial stability. Falls sharply in the final 2-3 days when the corpus luteum involutes.' },
+        { name: 'LH', level: '2-8 mIU/mL (suppressed)', role: 'Progesterone slows GnRH pulse frequency back to ~every 3-4 hours. This slow frequency favors FSH over LH, setting the stage for the next cycle. Low LH also means the corpus luteum gradually loses trophic support.' },
+        { name: 'Inhibin A', level: 'Elevated', role: 'Produced by the corpus luteum (replacing inhibin B from the follicular phase). Suppresses FSH to prevent premature follicle recruitment. Falls when the corpus luteum degrades, allowing FSH to rise and start the next cycle.' },
+        { name: 'Allopregnanolone', level: 'Rises with progesterone', role: 'A neuroactive progesterone metabolite that acts as a positive allosteric modulator of GABA-A receptors. Produces anxiolytic and sedative effects early in the luteal phase. Rapid withdrawal in late luteal contributes to PMS/PMDD anxiety and irritability.' },
+      ],
+      whatsHappening: 'The corpus luteum is one of the most vascularized structures in the body — it receives the highest blood flow per gram of any organ. If no implantation occurs, luteolysis begins around day 24-25: blood vessels constrict, immune cells infiltrate, and progesterone output crashes. The endometrium destabilizes as spiral arteries rhythmically constrict and relax, causing focal ischemia. Prostaglandin synthesis ramps up in preparation for menstruation.',
+      neurotransmitters: 'Progesterone and allopregnanolone initially boost GABA activity (calming). But as the corpus luteum fails and levels drop rapidly in late luteal phase, the brain experiences a withdrawal-like state. Serotonin drops (progesterone downregulates 5-HT1A receptors), contributing to irritability, anxiety, and carb cravings. MAO-A activity increases, accelerating serotonin and dopamine breakdown.',
+      keyMetabolism: 'Basal metabolic rate increases 100-300 kcal/day (the body is literally burning more energy preparing for potential pregnancy). This drives increased appetite and carb cravings — not lack of willpower, it is a real metabolic demand. Insulin sensitivity decreases. Water retention increases due to aldosterone effects of progesterone. Core body temp stays elevated 0.3-0.5°C above follicular baseline.',
+    },
   },
 ];
 
@@ -504,6 +563,8 @@ function HormoneChart({
 }
 
 function PhaseCard({ phase, isActive }: { phase: PhaseData; isActive: boolean }) {
+  const [showBiochem, setShowBiochem] = useState(false);
+
   return (
     <div style={{
       background: isActive ? phase.colorSoft : 'var(--surface)',
@@ -514,7 +575,7 @@ function PhaseCard({ phase, isActive }: { phase: PhaseData; isActive: boolean })
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <span style={{ fontSize: 18 }}>{phase.icon}</span>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: 15, color: isActive ? phase.color : 'var(--text)' }}>
             {phase.label} Phase
           </div>
@@ -542,6 +603,103 @@ function PhaseCard({ phase, isActive }: { phase: PhaseData; isActive: boolean })
           <div style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--text-2)' }}>{phase.mindset}</div>
         </div>
       </div>
+
+      {/* Biochemistry Toggle */}
+      <button
+        onClick={() => setShowBiochem(!showBiochem)}
+        style={{
+          marginTop: 12, padding: '8px 14px', width: '100%',
+          background: showBiochem ? phase.color + '18' : 'var(--surface-2)',
+          border: `1px solid ${showBiochem ? phase.color + '33' : 'var(--border)'}`,
+          borderRadius: 'var(--radius-sm)', color: showBiochem ? phase.color : 'var(--text-2)',
+          fontSize: 12, fontWeight: 600, cursor: 'pointer', textTransform: 'uppercase',
+          letterSpacing: '0.5px', transition: 'all 0.2s',
+        }}
+      >
+        {showBiochem ? 'Hide' : 'Show'} Biochemistry
+      </button>
+
+      {showBiochem && (
+        <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Summary */}
+          <div style={{
+            background: 'var(--surface)', borderRadius: 'var(--radius-sm)',
+            padding: '12px 14px', border: '1px solid var(--border)',
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: phase.color, marginBottom: 4 }}>
+              What's Happening
+            </div>
+            <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-2)' }}>
+              {phase.biochem.summary}
+            </div>
+          </div>
+
+          {/* Hormone Levels */}
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: phase.color, marginBottom: 6 }}>
+              Hormone Levels
+            </div>
+            {phase.biochem.hormones.map((h, i) => (
+              <div key={i} style={{
+                background: 'var(--surface)', borderRadius: 'var(--radius-sm)',
+                padding: '10px 12px', border: '1px solid var(--border)',
+                marginBottom: 4,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
+                  <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{h.name}</span>
+                  <span style={{
+                    fontSize: 10, padding: '2px 8px', borderRadius: 12,
+                    background: phase.color + '15', color: phase.color,
+                    fontWeight: 600, fontFamily: "'SF Mono', monospace", whiteSpace: 'nowrap',
+                  }}>
+                    {h.level}
+                  </span>
+                </div>
+                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-3)' }}>{h.role}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Biological Detail */}
+          <div style={{
+            background: 'var(--surface)', borderRadius: 'var(--radius-sm)',
+            padding: '12px 14px', border: '1px solid var(--border)',
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: phase.color, marginBottom: 4 }}>
+              Biological Process
+            </div>
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-2)' }}>
+              {phase.biochem.whatsHappening}
+            </div>
+          </div>
+
+          {/* Neurotransmitters */}
+          <div style={{
+            background: 'var(--surface)', borderRadius: 'var(--radius-sm)',
+            padding: '12px 14px', border: '1px solid var(--border)',
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: phase.color, marginBottom: 4 }}>
+              Brain Chemistry
+            </div>
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-2)' }}>
+              {phase.biochem.neurotransmitters}
+            </div>
+          </div>
+
+          {/* Metabolism */}
+          <div style={{
+            background: 'var(--surface)', borderRadius: 'var(--radius-sm)',
+            padding: '12px 14px', border: '1px solid var(--border)',
+          }}>
+            <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: phase.color, marginBottom: 4 }}>
+              Metabolism & Notes
+            </div>
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-2)' }}>
+              {phase.biochem.keyMetabolism}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
