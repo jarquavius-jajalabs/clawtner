@@ -63,28 +63,41 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
 
     const message = body.edited_message || draft.edited_message || draft.message;
 
-    // Log to history
+    // Log to history as pending
     const historyId = crypto.randomUUID();
     await context.env.CLAWTNER_DB.prepare(
       `INSERT INTO history (id, draft_id, contact_id, message, status)
-       VALUES (?, ?, ?, ?, 'sent')`
+       VALUES (?, ?, ?, ?, 'pending')`
     )
       .bind(historyId, id, draft.contact_id, message)
       .run();
 
     // Fire webhook
-    await fireWebhook(context.env.CLAWTNER_DB, draft.contact_id, {
+    const result = await fireWebhook(context.env.CLAWTNER_DB, draft.contact_id, {
       contact,
       message,
       draft: { ...draft, status: 'approved' },
     });
 
-    // Mark as sent
-    await context.env.CLAWTNER_DB.prepare(
-      "UPDATE drafts SET status = 'sent', sent_at = unixepoch() WHERE id = ?"
-    )
-      .bind(id)
-      .run();
+    if (result.success) {
+      // Mark history and draft as sent
+      await context.env.CLAWTNER_DB.prepare(
+        "UPDATE history SET status = 'delivered', delivered_at = unixepoch() WHERE id = ?"
+      ).bind(historyId).run();
+
+      await context.env.CLAWTNER_DB.prepare(
+        "UPDATE drafts SET status = 'sent', sent_at = unixepoch() WHERE id = ?"
+      ).bind(id).run();
+    } else {
+      // Mark history as failed, draft as failed
+      await context.env.CLAWTNER_DB.prepare(
+        "UPDATE history SET status = 'failed', error = ? WHERE id = ?"
+      ).bind(result.error || 'Unknown error', historyId).run();
+
+      await context.env.CLAWTNER_DB.prepare(
+        "UPDATE drafts SET status = 'failed', updated_at = unixepoch() WHERE id = ?"
+      ).bind(id).run();
+    }
   }
 
   return Response.json({ ok: true });

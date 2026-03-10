@@ -15,6 +15,10 @@ export interface Contact {
   zip?: string;
   country?: string;
   gift_preferences?: string;
+  love_language?: string;
+  love_language_secondary?: string;
+  convo_mode?: number;
+  convo_mode_escalation?: string;
   created_at: number;
   updated_at: number;
   total_sent?: number;
@@ -75,4 +79,36 @@ export interface HistoryEntry {
   created_at: number;
 }
 
-export type Tab = 'queue' | 'contacts' | 'flowers' | 'history' | 'settings';
+export interface Feedback {
+  id: string;
+  draft_id?: string;
+  contact_id: string;
+  reaction: string;
+  response_time?: number;
+  original_message?: string;
+  edited_message?: string;
+  notes?: string;
+  created_at: number;
+}
+
+export interface Insight {
+  id: string;
+  contact_id: string;
+  insight_type: string;
+  insight_key: string;
+  score: number;
+  sample_count: number;
+  last_updated: number;
+}
+
+export interface LearningStats {
+  total: number;
+  thumbs_up: number;
+  thumbs_down: number;
+  edited: number;
+  approval_rate: number | null;
+  edit_rate: number | null;
+  avg_response_time: number | null;
+}
+
+export type Tab = 'queue' | 'cycle' | 'contacts' | 'flowers' | 'history' | 'settings';

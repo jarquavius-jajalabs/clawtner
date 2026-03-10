@@ -22,6 +22,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
     'name', 'phone', 'email', 'channel', 'relationship', 'tone',
     'preferences', 'special_dates', 'address_line1', 'address_line2',
     'city', 'state', 'zip', 'country', 'gift_preferences',
+    'love_language', 'love_language_secondary', 'convo_mode', 'convo_mode_escalation',
   ];
 
   const updates: string[] = [];

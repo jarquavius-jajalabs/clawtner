@@ -3,6 +3,67 @@ import { Draft, Gift, Contact } from '../lib/types';
 import * as api from '../lib/api';
 import { useSwipe } from '../hooks/useSwipe';
 
+function FeedbackToast({
+  draft,
+  onFeedback,
+  onDismiss,
+}: {
+  draft: Draft;
+  onFeedback: (reaction: string) => void;
+  onDismiss: () => void;
+}) {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 4000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  return (
+    <div style={{
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius)',
+      padding: '12px 16px',
+      marginBottom: 8,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      animation: 'fadeIn 0.3s ease',
+    }}>
+      <span style={{ fontSize: 13, color: 'var(--text-2)' }}>How was that?</span>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => onFeedback('thumbs_up')}
+          style={{
+            padding: '6px 14px',
+            borderRadius: 20,
+            border: '1px solid var(--border)',
+            background: 'transparent',
+            color: 'var(--text)',
+            fontSize: 13,
+            cursor: 'pointer',
+          }}
+        >
+          Good
+        </button>
+        <button
+          onClick={() => onFeedback('thumbs_down')}
+          style={{
+            padding: '6px 14px',
+            borderRadius: 20,
+            border: '1px solid var(--border)',
+            background: 'transparent',
+            color: 'var(--text-3)',
+            fontSize: 13,
+            cursor: 'pointer',
+          }}
+        >
+          Meh
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function SwipeCard({
   children,
   onApprove,
@@ -15,10 +76,10 @@ function SwipeCard({
   const swipe = useSwipe(onReject, onApprove);
   const bg =
     swipe.direction === 'right'
-      ? 'rgba(72, 199, 142, 0.15)'
+      ? 'rgba(52, 211, 153, 0.08)'
       : swipe.direction === 'left'
-      ? 'rgba(255, 107, 107, 0.15)'
-      : 'var(--card-bg)';
+      ? 'rgba(255, 107, 107, 0.08)'
+      : 'var(--surface)';
 
   return (
     <div
@@ -50,6 +111,7 @@ export default function Queue() {
   const [editing, setEditing] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [feedbackDraft, setFeedbackDraft] = useState<Draft | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,19 +131,39 @@ export default function Queue() {
   useEffect(() => { load(); }, [load]);
 
   async function handleApprove(draft: Draft) {
-    const msg = editing === draft.id ? editText : undefined;
+    const wasEdited = editing === draft.id;
+    const msg = wasEdited ? editText : undefined;
     await api.approveDraft(draft.id, msg);
+
+    // Log feedback: edited = auto thumbs_down vibe, otherwise show prompt
+    if (wasEdited) {
+      await api.createFeedback({
+        draft_id: draft.id,
+        contact_id: draft.contact_id,
+        reaction: 'edited',
+        original_message: draft.message,
+        edited_message: editText,
+      });
+    } else {
+      setFeedbackDraft(draft);
+    }
+
     setEditing(null);
     load();
   }
 
-  async function handleReject(id: string) {
+  async function handleReject(id: string, draft: Draft) {
     await api.rejectDraft(id);
+    await api.createFeedback({
+      draft_id: id,
+      contact_id: draft.contact_id,
+      reaction: 'thumbs_down',
+      original_message: draft.message,
+    });
     load();
   }
 
   async function handleGiftApprove(gift: Gift) {
-    // TODO: Integrate Stripe Elements for real payment token
     await api.approveGift(gift.id, 'tok_mock_' + Date.now());
     load();
   }
@@ -91,6 +173,18 @@ export default function Queue() {
     load();
   }
 
+  function handleFeedback(reaction: string) {
+    if (feedbackDraft) {
+      api.createFeedback({
+        draft_id: feedbackDraft.id,
+        contact_id: feedbackDraft.contact_id,
+        reaction,
+        original_message: feedbackDraft.message,
+      });
+      setFeedbackDraft(null);
+    }
+  }
+
   if (loading) return <div className="loading">Loading...</div>;
 
   const items = [
@@ -98,24 +192,35 @@ export default function Queue() {
     ...gifts.map((g) => ({ type: 'gift' as const, item: g, key: g.id })),
   ].sort((a, b) => b.item.created_at - a.item.created_at);
 
-  if (items.length === 0) {
+  if (items.length === 0 && !feedbackDraft) {
     return (
       <div className="empty-state">
         <div className="empty-icon">✓</div>
-        <p>All caught up. Nothing pending.</p>
+        <p>All caught up</p>
       </div>
     );
   }
 
   return (
     <div className="queue">
-      <div className="queue-count">{items.length} pending</div>
+      {feedbackDraft && (
+        <FeedbackToast
+          draft={feedbackDraft}
+          onFeedback={handleFeedback}
+          onDismiss={() => setFeedbackDraft(null)}
+        />
+      )}
+
+      {items.length > 0 && (
+        <div className="queue-count">{items.length} pending</div>
+      )}
+
       {items.map(({ type, item, key }) =>
         type === 'draft' ? (
           <SwipeCard
             key={key}
             onApprove={() => handleApprove(item as Draft)}
-            onReject={() => handleReject(key)}
+            onReject={() => handleReject(key, item as Draft)}
           >
             <div className="card-header">
               <span className="contact-name">
@@ -141,7 +246,7 @@ export default function Queue() {
                 {(item as Draft).message}
               </p>
             )}
-            <div className="card-meta">tap message to edit before sending</div>
+            <div className="card-meta">tap to edit</div>
           </SwipeCard>
         ) : (
           <SwipeCard
@@ -153,7 +258,7 @@ export default function Queue() {
               <span className="contact-name">
                 {contacts[(item as Gift).contact_id]?.name || (item as Gift).contact_id}
               </span>
-              <span className="card-category gift-badge">🌸 Gift</span>
+              <span className="card-category gift-badge">Gift</span>
             </div>
             {(item as Gift).product_image && (
               <img

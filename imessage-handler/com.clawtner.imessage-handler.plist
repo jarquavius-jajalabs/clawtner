@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.clawtner.imessage-handler</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/jarquavius/.bun/bin/bun</string>
+    <string>run</string>
+    <string>/Users/jarquavius/.openclaw/workspace/projects/clawtner/imessage-handler/server.ts</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/tmp/clawtner-imessage.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/clawtner-imessage-error.log</string>
+  <key>WorkingDirectory</key>
+  <string>/Users/jarquavius/.openclaw/workspace/projects/clawtner/imessage-handler</string>
+</dict>
+</plist>

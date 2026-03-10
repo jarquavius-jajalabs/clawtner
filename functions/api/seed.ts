@@ -16,8 +16,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   // Contacts
   await db.batch([
-    db.prepare(`INSERT INTO contacts (id, name, phone, relationship, tone, address_line1, city, state, zip, gift_preferences)
-      VALUES ('darcie', 'Darcie', '+19517641875', 'partner', 'warm, loving', '123 Main St', 'Temecula', 'CA', '92591', 'Loves sunflowers and peonies. Allergic to lilies.')`),
+    db.prepare(`INSERT INTO contacts (id, name, phone, relationship, tone, address_line1, city, state, zip, gift_preferences, love_language, love_language_secondary)
+      VALUES ('darcie', 'Darcie', '+19517641875', 'partner', 'warm, loving', '123 Main St', 'Temecula', 'CA', '92591', 'Loves sunflowers and peonies. Allergic to lilies.', 'words_of_affirmation', 'quality_time')`),
     db.prepare(`INSERT INTO contacts (id, name, phone, relationship, tone, address_line1, city, state, zip)
       VALUES ('mom', 'Mom', '+15551234567', 'parent', 'caring, respectful', '456 Oak Ave', 'Tampa', 'FL', '33601')`),
     db.prepare(`INSERT INTO contacts (id, name, email, relationship, tone)
@@ -47,6 +47,32 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       VALUES ('hist-2', 'darcie', 'Picking up groceries on my way home. Need anything?', 'sent', ?)`).bind(now - 43200),
     db.prepare(`INSERT INTO history (id, contact_id, message, status, created_at)
       VALUES ('hist-3', 'mom', 'Happy birthday Mom! Love you so much. Lets do dinner soon.', 'sent', ?)`).bind(now - 172800),
+  ]);
+
+  // Seed feedback
+  await db.batch([
+    db.prepare(`INSERT INTO feedback (id, draft_id, contact_id, reaction, original_message, created_at)
+      VALUES ('fb-1', 'hist-1', 'darcie', 'thumbs_up', 'Good morning beautiful. Hope your day is as amazing as you are.', ?)`).bind(now - 86400),
+    db.prepare(`INSERT INTO feedback (id, draft_id, contact_id, reaction, original_message, created_at)
+      VALUES ('fb-2', 'hist-2', 'darcie', 'thumbs_up', 'Picking up groceries on my way home. Need anything?', ?)`).bind(now - 43200),
+    db.prepare(`INSERT INTO feedback (id, draft_id, contact_id, reaction, original_message, created_at)
+      VALUES ('fb-3', 'hist-3', 'mom', 'thumbs_up', 'Happy birthday Mom! Love you so much.', ?)`).bind(now - 172800),
+  ]);
+
+  // Seed insights
+  await db.batch([
+    db.prepare(`INSERT INTO insights (id, contact_id, insight_type, insight_key, score, sample_count)
+      VALUES ('ins-1', 'darcie', 'timing', 'Morning (8-10am)', 4.2, 12)`),
+    db.prepare(`INSERT INTO insights (id, contact_id, insight_type, insight_key, score, sample_count)
+      VALUES ('ins-2', 'darcie', 'timing', 'Afternoon (2-4pm)', 3.1, 8)`),
+    db.prepare(`INSERT INTO insights (id, contact_id, insight_type, insight_key, score, sample_count)
+      VALUES ('ins-3', 'darcie', 'tone', 'Warm + specific', 4.5, 15)`),
+    db.prepare(`INSERT INTO insights (id, contact_id, insight_type, insight_key, score, sample_count)
+      VALUES ('ins-4', 'darcie', 'tone', 'Generic compliment', -1.2, 6)`),
+    db.prepare(`INSERT INTO insights (id, contact_id, insight_type, insight_key, score, sample_count)
+      VALUES ('ins-5', 'darcie', 'topic', 'Acts of service', 3.8, 9)`),
+    db.prepare(`INSERT INTO insights (id, contact_id, insight_type, insight_key, score, sample_count)
+      VALUES ('ins-6', 'darcie', 'length', 'Short (1-2 sentences)', 3.5, 14)`),
   ]);
 
   return Response.json({ ok: true, message: 'Demo data seeded' });

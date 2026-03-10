@@ -68,6 +68,19 @@ export const getHistory = (limit?: number) => req(`/history${limit ? `?limit=${l
 // Channels
 export const getChannels = () => req('/channels');
 export const createChannel = (data: any) => req('/channels', { method: 'POST', body: JSON.stringify(data) });
+export const updateChannel = (id: string, data: any) => req(`/channels/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteChannel = (id: string) => req(`/channels/${id}`, { method: 'DELETE' });
+export const testChannel = (channel_id: string) => req('/channels/test', { method: 'POST', body: JSON.stringify({ channel_id }) });
+
+// Feedback & Learning
+export const createFeedback = (data: any) => req('/feedback', { method: 'POST', body: JSON.stringify(data) });
+export const getFeedback = (contactId: string) => req(`/feedback?contact_id=${contactId}`);
+export const getInsights = (contactId: string) => req(`/feedback/insights/${contactId}`);
+
+// Cycles
+export const getCycles = (contactId: string) => req(`/cycles?contact_id=${contactId}`);
+export const createCycle = (data: any) => req('/cycles', { method: 'POST', body: JSON.stringify(data) });
+export const updateCycle = (id: string, data: any) => req(`/cycles/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 
 // API Keys
 export const getApiKeys = () => req('/auth/keys');

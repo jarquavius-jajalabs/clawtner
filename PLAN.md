@@ -5,13 +5,13 @@ Agent-agnostic relationship message queue with human-in-the-loop approval. Open 
 
 ## Phase 1: Core API + MVP UI (Week 1)
 
-### 1.1 Project Setup `[ ]`
+### 1.1 Project Setup `[x]`
 - Cloudflare Workers + Pages project (wrangler)
 - D1 database
 - TypeScript
 - React frontend (Vite)
 
-### 1.2 Database Schema `[ ]`
+### 1.2 Database Schema `[x]`
 
 ```sql
 -- Contacts you message
@@ -83,7 +83,7 @@ CREATE TABLE history (
 );
 ```
 
-### 1.3 API Routes `[ ]`
+### 1.3 API Routes `[x]`
 
 ```
 # Auth
@@ -115,7 +115,7 @@ GET    /api/history             — sent message log
 GET    /api/history/:contact_id — history for specific contact
 ```
 
-### 1.4 Mobile PWA `[ ]`
+### 1.4 Mobile PWA `[x]`
 - Approval queue — swipeable cards
 - Contact management
 - History view
