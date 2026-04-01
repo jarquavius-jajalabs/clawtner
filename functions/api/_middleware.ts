@@ -2,7 +2,7 @@ import { verifyApiKey, verifySession } from '../lib/auth';
 import { Env } from '../lib/db';
 
 // Routes that don't need auth
-const PUBLIC_ROUTES = ['/api/auth/pin', '/api/auth/demo'];
+const PUBLIC_ROUTES = ['/api/auth/pin', '/api/auth/demo', '/api/messages/webhook'];
 
 export const onRequest: PagesFunction<Env>[] = [
   async (context) => {

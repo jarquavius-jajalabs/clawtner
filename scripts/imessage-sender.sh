@@ -3,7 +3,7 @@
 # Run via cron: * * * * * /path/to/imessage-sender.sh
 
 API_URL="https://clawtner.pages.dev"
-API_KEY="" # Set this
+API_KEY="clw_ebdf0bf3580b4486b534b6291b3ca19d"
 
 # Get queued messages
 QUEUED=$(curl -sf "$API_URL/api/messages/queued" \

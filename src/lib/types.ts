@@ -155,4 +155,4 @@ export interface MessageLog {
   updated_at: number;
 }
 
-export type Tab = 'queue' | 'cycle' | 'contacts' | 'flowers' | 'history' | 'settings';
+export type Tab = 'queue' | 'cycle' | 'schedule' | 'contacts' | 'flowers' | 'history' | 'settings';

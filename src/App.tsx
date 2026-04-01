@@ -7,6 +7,7 @@ import Contacts from './components/Contacts';
 import Flowers from './components/Flowers';
 import History from './components/History';
 import Settings from './components/Settings';
+import Schedules from './components/Schedules';
 
 function LoginScreen() {
   const [pin, setPin] = useState('');
@@ -82,6 +83,7 @@ function LoginScreen() {
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'cycle', label: 'Cycle', icon: <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" /><path d="M10 2.5a7.5 7.5 0 0 1 0 15V2.5z" fill="currentColor" /></svg> },
   { id: 'queue', label: 'Queue', icon: <svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2" /><path d="M3 8h14" /><path d="M8 8v8" /></svg> },
+  { id: 'schedule', label: 'Schedule', icon: <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" /><path d="M10 5.5v5l3.5 2" /></svg> },
   { id: 'contacts', label: 'People', icon: <svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" /><path d="M3.5 17.5c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6" /></svg> },
   { id: 'flowers', label: 'Gifts', icon: <svg viewBox="0 0 20 20"><path d="M10 6C10 4 8 2 6 2s-4 2-4 4 2 4 4 4" /><path d="M10 6c0-2 2-4 4-4s4 2 4 4-2 4-4 4" /><rect x="4" y="10" width="12" height="3" rx="1" /><rect x="6" y="13" width="8" height="5" rx="1" /><line x1="10" y1="6" x2="10" y2="18" /></svg> },
   { id: 'history', label: 'Sent', icon: <svg viewBox="0 0 20 20"><path d="M3 10l6-7v4h8v6h-8v4z" /></svg> },
@@ -108,6 +110,7 @@ export default function App() {
       <main className="app-main">
         {tab === 'queue' && <Queue />}
         {tab === 'cycle' && <CyclePage />}
+        {tab === 'schedule' && <Schedules />}
         {tab === 'flowers' && <Flowers />}
         {tab === 'contacts' && <Contacts />}
         {tab === 'history' && <History />}

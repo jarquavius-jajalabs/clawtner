@@ -6,7 +6,8 @@ Relationship CRM with scheduled iMessage delivery.
 ## Links
 - **Live site:** https://clawtner.pages.dev
 - **PIN:** 0000
-- **Repo:** `/Users/jarquavius/.openclaw/workspace/projects/clawtner/`
+- **Repo (local):** `/Users/jarquavius/.openclaw/workspace/projects/clawtner/`
+- **Repo (GitHub):** https://github.com/jarquavius-jajalabs/clawtner
 
 ## Stack
 - **Frontend:** Vite + React (TypeScript), `src/`
@@ -67,6 +68,62 @@ Full doc: `ARCHITECTURE-V2.md` (schema, API routes, build phases)
 - `functions/lib/db.ts` — Env type
 - `functions/lib/imessage.ts` — iMessage queue logic
 - `src/styles.css` — all styling
+
+## Project Structure
+```
+src/                          # Frontend (React)
+  App.tsx                     # Main app, routing, login, tab bar
+  components/
+    Queue.tsx                 # Swipe-to-approve message queue
+    Contacts.tsx              # Contact list + detail
+    ContactDetail.tsx         # Single contact view
+    CyclePage.tsx             # Period/cycle tracker
+    CycleTracker.tsx          # Cycle visualization
+    Flowers.tsx               # Gift ordering
+    History.tsx               # Sent messages log
+    Settings.tsx              # Config, API keys
+  lib/
+    api.ts                    # API client (all fetch calls)
+    types.ts                  # TypeScript interfaces
+  styles.css                  # All CSS (single file)
+
+functions/                    # Backend (Cloudflare Pages Functions)
+  api/
+    _middleware.ts            # Auth middleware (API key or JWT)
+    auth/                     # PIN login, demo mode, API key management
+    contacts/                 # CRUD + profile (Soul MD)
+    contacts/[id]/profile.ts  # Key-value profile fields per contact
+    drafts/                   # Draft CRUD + approval → iMessage queue
+    schedules/                # Recurring schedule CRUD
+    messages/                 # Send, queue polling, status reporting, webhook
+    cycles/                   # Period tracking
+    gifts/                    # Flower/gift ordering
+    history/                  # Sent message history
+    feedback/                 # Thumbs up/down + learning insights
+  lib/
+    auth.ts                   # SHA-256 hashing, JWT sessions
+    db.ts                     # Env type, ID generation
+    imessage.ts               # Queue messages for iMessage delivery
+    twilio.ts                 # SMS/WhatsApp (kept for future)
+    webhooks.ts               # Webhook fallback delivery
+    floristone.ts             # Flower API
+
+migrations/                   # D1 schema
+  001_init.sql                # Contacts, drafts, channels, API keys, history, cycles
+  002_flowers.sql             # Gift orders, contact addresses
+  003_features.sql            # Love language, feedback, insights
+  004_tier1.sql               # Schedules, contact_profile, message_log
+
+scripts/
+  imessage-sender.sh          # Cron script: polls queue, sends via imsg CLI
+```
+
+## Key Design Decisions
+1. **auto_approve hardcoded to 0** — every message must be manually approved. Can't be changed via API. Safety feature.
+2. **iMessage delivery is async** — approve → queue in D1 → Mac mini cron polls → imsg send → reports back via API. ~1 min delay max.
+3. **Auth is PIN-based** — SHA-256 hash stored as Cloudflare secret. JWT session token lasts 7 days.
+4. **Soul MD profiles** — flexible key-value pairs grouped by category (favorites, dislikes, triggers, inside_jokes, routines). AI draft generation will use these for personalized messages.
+5. **Cycle tracker** — adjusts message tone by menstrual phase.
 
 ## Deploy
 ```bash

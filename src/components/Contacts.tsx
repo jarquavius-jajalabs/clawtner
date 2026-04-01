@@ -73,7 +73,7 @@ export default function Contacts() {
       {showForm && (
         <form className="contact-form" onSubmit={handleSubmit}>
           <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <input type="tel" placeholder="Phone (+1XXXXXXXXXX)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           <select value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })}>
             <option value="">Relationship...</option>
