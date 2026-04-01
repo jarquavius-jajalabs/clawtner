@@ -119,3 +119,11 @@ export const deleteProfileField = (contactId: string, category: string, key?: st
 // Messages
 export const sendMessage = (data: { draft_id?: string; contact_id?: string; message?: string }) =>
   req('/messages/send', { method: 'POST', body: JSON.stringify(data) });
+
+// Compose
+export const generateDraft = (contactId: string, category: string) =>
+  req('/compose/generate', { method: 'POST', body: JSON.stringify({ contact_id: contactId, category }) });
+export const createDraft = (data: { contact_id: string; message: string; category: string }) =>
+  req('/drafts', { method: 'POST', body: JSON.stringify(data) });
+export const sendNow = (contactId: string, message: string, category: string) =>
+  req('/compose/send-now', { method: 'POST', body: JSON.stringify({ contact_id: contactId, message, category }) });

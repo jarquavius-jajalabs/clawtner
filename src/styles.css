@@ -1374,3 +1374,26 @@ body {
   color: white;
   border-color: var(--accent);
 }
+
+/* Compose */
+.compose { padding: 8px 0; }
+.compose-section { margin-bottom: 16px; }
+.compose-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.compose-select { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px; background: var(--surface); color: var(--text); appearance: none; }
+.compose-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.compose-chip { display: flex; align-items: center; gap: 6px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text); font-size: 14px; cursor: pointer; transition: all 0.15s ease; }
+.compose-chip:hover { border-color: var(--accent); }
+.compose-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+.compose-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+.compose-generating { display: flex; align-items: center; gap: 10px; padding: 16px; background: var(--surface); border-radius: var(--radius); margin-bottom: 16px; font-size: 14px; color: var(--text-2); }
+.compose-spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.compose-textarea { width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 15px; font-family: inherit; resize: vertical; min-height: 100px; background: var(--surface); color: var(--text); line-height: 1.5; }
+.compose-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.compose-charcount { font-size: 12px; color: var(--text-3); text-align: right; margin-top: 4px; }
+.compose-actions { display: flex; gap: 10px; margin-top: 16px; }
+.compose-send-now { flex: 1; padding: 14px; font-size: 16px; font-weight: 600; }
+.compose-queue { flex: 1; padding: 14px; font-size: 14px; }
+.compose-warning { margin-top: 8px; padding: 10px 14px; background: rgba(255, 107, 107, 0.08); border: 1px solid rgba(255, 107, 107, 0.2); border-radius: var(--radius); font-size: 13px; color: var(--red); }
+.toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background: var(--green); color: white; border-radius: 20px; font-size: 14px; font-weight: 500; z-index: 100; animation: fadeIn 0.3s ease; }
+.toast-error { background: var(--red); }

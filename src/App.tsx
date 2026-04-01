@@ -8,6 +8,7 @@ import Flowers from './components/Flowers';
 import History from './components/History';
 import Settings from './components/Settings';
 import Schedules from './components/Schedules';
+import Compose from './components/Compose';
 import Onboarding from './components/Onboarding';
 
 function LoginScreen() {
@@ -83,6 +84,7 @@ function LoginScreen() {
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'cycle', label: 'Cycle', icon: <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" /><path d="M10 2.5a7.5 7.5 0 0 1 0 15V2.5z" fill="currentColor" /></svg> },
+  { id: 'compose', label: 'New', icon: <svg viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" strokeLinecap="round" /></svg> },
   { id: 'queue', label: 'Queue', icon: <svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2" /><path d="M3 8h14" /><path d="M8 8v8" /></svg> },
   { id: 'schedule', label: 'Schedule', icon: <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" /><path d="M10 5.5v5l3.5 2" /></svg> },
   { id: 'contacts', label: 'People', icon: <svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.5" /><path d="M3.5 17.5c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6" /></svg> },
@@ -114,6 +116,7 @@ export default function App() {
       </header>
 
       <main className="app-main">
+        {tab === 'compose' && <Compose />}
         {tab === 'queue' && <Queue />}
         {tab === 'cycle' && <CyclePage />}
         {tab === 'schedule' && <Schedules />}
