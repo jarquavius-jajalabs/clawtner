@@ -8,6 +8,7 @@ import Flowers from './components/Flowers';
 import History from './components/History';
 import Settings from './components/Settings';
 import Schedules from './components/Schedules';
+import Onboarding from './components/Onboarding';
 
 function LoginScreen() {
   const [pin, setPin] = useState('');
@@ -92,9 +93,14 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('cycle');
+  const [onboarded, setOnboarded] = useState(() => localStorage.getItem('onboarding_complete') === '1');
 
   if (!api.isAuthed()) {
     return <LoginScreen />;
+  }
+
+  if (!onboarded) {
+    return <Onboarding onComplete={() => setOnboarded(true)} />;
   }
 
   return (

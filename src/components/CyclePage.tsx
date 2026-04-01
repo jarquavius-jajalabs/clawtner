@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { Contact } from '../lib/types';
 import * as api from '../lib/api';
 import CycleTracker from './CycleTracker';
+import CycleImport from './CycleImport';
 
 export default function CyclePage() {
   const [partner, setPartner] = useState<Contact | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showImport, setShowImport] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     api.getContacts().then((res) => {
@@ -42,12 +45,30 @@ export default function CyclePage() {
         }}>
           {partner.name.charAt(0).toUpperCase()}
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 600, fontSize: 15 }}>{partner.name}</div>
           <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Cycle Tracker</div>
         </div>
+        <button
+          onClick={() => setShowImport(true)}
+          style={{
+            padding: '6px 14px', borderRadius: 20,
+            border: '1px solid var(--border)', background: 'var(--surface)',
+            color: 'var(--text-2)', fontSize: 12, fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          Import
+        </button>
       </div>
-      <CycleTracker contact={partner} />
+      <CycleTracker key={refreshKey} contact={partner} />
+      {showImport && (
+        <CycleImport
+          contactId={partner.id}
+          onImported={() => { setShowImport(false); setRefreshKey((k) => k + 1); }}
+          onClose={() => setShowImport(false)}
+        />
+      )}
     </div>
   );
 }

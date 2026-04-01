@@ -16,4 +16,5 @@ export type Env = {
   TWILIO_ACCOUNT_SID?: string;
   TWILIO_AUTH_TOKEN?: string;
   TWILIO_FROM_NUMBER?: string;
+  ANTHROPIC_API_KEY?: string;
 };

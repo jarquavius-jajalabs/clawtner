@@ -4,6 +4,7 @@ import * as api from '../lib/api';
 import CycleTracker from './CycleTracker';
 import Learning from './Learning';
 import SoulProfile from './SoulProfile';
+import Analytics from './Analytics';
 
 const LOVE_LANGUAGES = [
   { id: 'words_of_affirmation', label: 'Words' },
@@ -31,7 +32,7 @@ export default function ContactDetail({
 }) {
   const [contact, setContact] = useState(initialContact);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [tab, setTab] = useState<'messages' | 'cycle' | 'learning' | 'soul' | 'info'>('messages');
+  const [tab, setTab] = useState<'messages' | 'cycle' | 'learning' | 'soul' | 'analytics' | 'info'>('messages');
 
   useEffect(() => {
     fetch(`/api/history/${contact.id}`, {
@@ -196,6 +197,9 @@ export default function ContactDetail({
         <button className={`detail-tab ${tab === 'soul' ? 'active' : ''}`} onClick={() => setTab('soul')}>
           Soul
         </button>
+        <button className={`detail-tab ${tab === 'analytics' ? 'active' : ''}`} onClick={() => setTab('analytics')}>
+          Analytics
+        </button>
         <button className={`detail-tab ${tab === 'info' ? 'active' : ''}`} onClick={() => setTab('info')}>
           Info
         </button>
@@ -220,6 +224,8 @@ export default function ContactDetail({
       {tab === 'learning' && <Learning contact={contact} />}
 
       {tab === 'soul' && <SoulProfile contactId={contact.id} />}
+
+      {tab === 'analytics' && <Analytics contact={contact} />}
 
       {tab === 'info' && (
         <div className="detail-info">

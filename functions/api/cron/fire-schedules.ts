@@ -1,6 +1,6 @@
 import { Env, generateId } from '../../lib/db';
 
-// Message templates by category
+// Fallback templates by category
 const TEMPLATES: Record<string, string[]> = {
   'good-morning': [
     'Good morning! Hope you have an amazing day today.',
@@ -38,6 +38,96 @@ const TEMPLATES: Record<string, string[]> = {
 function pickTemplate(category: string): string {
   const templates = TEMPLATES[category] || TEMPLATES['general'];
   return templates[Math.floor(Math.random() * templates.length)];
+}
+
+interface ProfileData {
+  favorites: Record<string, string>;
+  dislikes: Record<string, string>;
+  inside_jokes: Record<string, string>;
+  communication: Record<string, string>;
+  [key: string]: Record<string, string>;
+}
+
+function formatProfileSection(data: Record<string, string>): string {
+  const entries = Object.entries(data);
+  if (entries.length === 0) return 'None recorded';
+  return entries.map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`).join(', ');
+}
+
+async function generateWithAI(
+  env: Env,
+  schedule: any,
+  contact: any,
+  profile: ProfileData,
+  recentMessages: string[],
+  cycleData: any | null,
+): Promise<string | null> {
+  if (!env.ANTHROPIC_API_KEY) return null;
+
+  let prompt = `You are writing a text message from a person to their ${contact.relationship || 'loved one'}.\nKeep it natural, casual, like a real text. No emojis unless the communication style says otherwise.\n\nCategory: ${schedule.category || 'general'}\nTone: ${contact.tone || 'warm and casual'}\nTheir name: ${contact.name}`;
+
+  prompt += `\nThings they like: ${formatProfileSection(profile.favorites || {})}`;
+  prompt += `\nThings they dislike: ${formatProfileSection(profile.dislikes || {})}`;
+  prompt += `\nInside jokes: ${formatProfileSection(profile.inside_jokes || {})}`;
+  prompt += `\nCommunication style: ${formatProfileSection(profile.communication || {})}`;
+
+  if (recentMessages.length > 0) {
+    prompt += `\n\nRecent messages sent (don't repeat these):\n${recentMessages.map((m) => `- ${m}`).join('\n')}`;
+  }
+
+  if (cycleData) {
+    const phase = getCyclePhase(cycleData);
+    if (phase) {
+      prompt += `\n\nShe's currently in her ${phase} phase. Adjust tone accordingly.`;
+    }
+  }
+
+  if (schedule.prompt_context) {
+    prompt += `\n\nAdditional context: ${schedule.prompt_context}`;
+  }
+
+  prompt += `\n\nWrite ONE text message. Just the message, nothing else. Keep it under 160 characters unless it needs to be longer.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json() as { content?: { type: string; text: string }[] };
+    const text = data.content?.[0]?.text?.trim();
+    return text || null;
+  } catch {
+    return null;
+  }
+}
+
+function getCyclePhase(cycle: any): string | null {
+  if (!cycle?.cycle_start) return null;
+  const start = new Date(cycle.cycle_start + 'T00:00:00');
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const diff = Math.floor((now.getTime() - start.getTime()) / 86400000);
+  if (diff < 0) return null;
+  const cycleLength = cycle.cycle_length || 28;
+  const periodLength = cycle.period_length || 5;
+  const day = ((diff % cycleLength) + cycleLength) % cycleLength + 1;
+
+  if (day <= periodLength) return 'menstrual';
+  if (day <= Math.round(cycleLength * 0.5)) return 'follicular';
+  if (day <= Math.round(cycleLength * 0.6)) return 'ovulation';
+  return 'luteal';
 }
 
 function calculateNextFire(schedule: any): number {
@@ -90,8 +180,52 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const generated: string[] = [];
 
   for (const schedule of schedules) {
-    // Generate a draft from template (later: AI generation using contact profile)
-    const message = pickTemplate(schedule.category || 'general');
+    let message: string;
+
+    // Try AI generation first
+    try {
+      // Load contact info
+      const contactRes = await context.env.CLAWTNER_DB.prepare(
+        'SELECT * FROM contacts WHERE id = ?'
+      ).bind(schedule.contact_id).first<any>();
+
+      // Load Soul MD profile
+      const profileRes = await context.env.CLAWTNER_DB.prepare(
+        'SELECT * FROM contact_profile WHERE contact_id = ?'
+      ).bind(schedule.contact_id).all<any>();
+
+      const profile: ProfileData = { favorites: {}, dislikes: {}, inside_jokes: {}, communication: {} };
+      for (const row of (profileRes.results || [])) {
+        if (!profile[row.category]) profile[row.category] = {};
+        profile[row.category][row.key] = row.value;
+      }
+
+      // Load recent messages
+      const historyRes = await context.env.CLAWTNER_DB.prepare(
+        'SELECT message FROM history WHERE contact_id = ? ORDER BY created_at DESC LIMIT 5'
+      ).bind(schedule.contact_id).all<any>();
+      const recentMessages = (historyRes.results || []).map((r: any) => r.message);
+
+      // Load cycle data if exists
+      const cycleRes = await context.env.CLAWTNER_DB.prepare(
+        'SELECT * FROM cycles WHERE contact_id = ? ORDER BY cycle_start DESC LIMIT 1'
+      ).bind(schedule.contact_id).first<any>();
+
+      const aiMessage = await generateWithAI(
+        context.env,
+        schedule,
+        contactRes || { name: schedule.contact_name, relationship: '', tone: '' },
+        profile,
+        recentMessages,
+        cycleRes || null,
+      );
+
+      message = aiMessage || pickTemplate(schedule.category || 'general');
+    } catch {
+      // Fall back to template on any error
+      message = pickTemplate(schedule.category || 'general');
+    }
+
     const draftId = generateId();
 
     await context.env.CLAWTNER_DB.prepare(
