@@ -3,11 +3,21 @@ import { Contact } from '../lib/types';
 import * as api from '../lib/api';
 import ContactDetail from './ContactDetail';
 
+function isValidPhone(phone: string): boolean {
+  if (!phone) return true;
+  const digits = phone.replace(/[^\d]/g, '');
+  return phone.startsWith('+') && digits.length >= 10;
+}
+
 export default function Contacts() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selected, setSelected] = useState<Contact | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [loadError, setLoadError] = useState('');
   const [form, setForm] = useState({
     name: '', phone: '', email: '', relationship: '', tone: '',
     address_line1: '', address_line2: '', city: '', state: '', zip: '', country: 'US',
@@ -15,8 +25,17 @@ export default function Contacts() {
   });
 
   async function load() {
-    const res = await api.getContacts();
-    setContacts(res.contacts || []);
+    setLoadError('');
+    try {
+      const res = await api.getContacts();
+      setContacts(res.contacts || []);
+    } catch (e: any) {
+      if (e.name === 'OfflineError') {
+        setLoadError("You're offline. Pull to refresh.");
+      } else {
+        setLoadError('Failed to load contacts.');
+      }
+    }
   }
   useEffect(() => { load(); }, []);
 
@@ -26,6 +45,8 @@ export default function Contacts() {
       gift_preferences: '' });
     setEditing(null);
     setShowForm(false);
+    setError('');
+    setPhoneError('');
   }
 
   function editContact(e: React.MouseEvent, c: Contact) {
@@ -39,29 +60,73 @@ export default function Contacts() {
     });
     setEditing(c);
     setShowForm(true);
+    setError('');
+    setPhoneError('');
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (editing) {
-      await api.updateContact(editing.id, form);
-    } else {
-      await api.createContact({ ...form, id: form.name.toLowerCase().replace(/\s+/g, '-') });
+    setError('');
+    setPhoneError('');
+
+    if (!form.name.trim()) {
+      setError('Name is required');
+      return;
     }
-    resetForm();
-    load();
+
+    if (form.phone && !isValidPhone(form.phone)) {
+      setPhoneError('Phone must start with + and have 10+ digits (e.g. +15551234567)');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      if (editing) {
+        await api.updateContact(editing.id, form);
+        resetForm();
+        load();
+      } else {
+        const id = form.name.toLowerCase().replace(/\s+/g, '-');
+        await api.createContact({ ...form, id });
+        resetForm();
+        // Auto-navigate to the new contact's detail page
+        const res = await api.getContacts();
+        const newContacts: Contact[] = res.contacts || [];
+        setContacts(newContacts);
+        const newContact = newContacts.find((c) => c.id === id);
+        if (newContact) {
+          setSelected(newContact);
+        }
+      }
+    } catch (e: any) {
+      setError(e.message || 'Failed to save contact');
+    }
+    setSubmitting(false);
   }
 
   async function handleDelete(e: React.MouseEvent, id: string) {
     e.stopPropagation();
     if (confirm('Delete this contact?')) {
-      await api.deleteContact(id);
-      load();
+      try {
+        await api.deleteContact(id);
+        load();
+      } catch {
+        setError('Failed to delete contact');
+      }
     }
   }
 
   if (selected) {
     return <ContactDetail contact={selected} onBack={() => { setSelected(null); load(); }} />;
+  }
+
+  if (loadError) {
+    return (
+      <div className="empty-state">
+        <p>{loadError}</p>
+        <button className="btn-primary" onClick={load} style={{ marginTop: 12 }}>Retry</button>
+      </div>
+    );
   }
 
   return (
@@ -72,8 +137,16 @@ export default function Contacts() {
 
       {showForm && (
         <form className="contact-form" onSubmit={handleSubmit}>
-          <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <input type="tel" placeholder="Phone (+1XXXXXXXXXX)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <input placeholder="Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          {error && <div className="error" style={{ color: 'var(--accent)', fontSize: 13, marginBottom: 4 }}>{error}</div>}
+          <input
+            type="tel"
+            placeholder="Phone (+1XXXXXXXXXX)"
+            value={form.phone}
+            onChange={(e) => { setForm({ ...form, phone: e.target.value }); setPhoneError(''); }}
+            style={phoneError ? { borderColor: 'var(--accent)' } : undefined}
+          />
+          {phoneError && <div style={{ color: 'var(--accent)', fontSize: 12, marginTop: -4, marginBottom: 4 }}>{phoneError}</div>}
           <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           <select value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })}>
             <option value="">Relationship...</option>
@@ -99,7 +172,9 @@ export default function Contacts() {
           <textarea placeholder="Gift preferences (favorite flowers, allergies, notes...)" value={form.gift_preferences} onChange={(e) => setForm({ ...form, gift_preferences: e.target.value })} />
 
           <div className="form-actions">
-            <button type="submit" className="btn-primary">{editing ? 'Update' : 'Add'}</button>
+            <button type="submit" className="btn-primary" disabled={submitting}>
+              {submitting ? 'Saving...' : editing ? 'Update' : 'Add'}
+            </button>
             <button type="button" className="btn-secondary" onClick={resetForm}>Cancel</button>
           </div>
         </form>
@@ -117,7 +192,7 @@ export default function Contacts() {
             </div>
             <div className="contact-actions">
               <button onClick={(e) => editContact(e, c)}>Edit</button>
-              <button className="btn-danger" onClick={(e) => handleDelete(e, c.id)}>×</button>
+              <button className="btn-danger" onClick={(e) => handleDelete(e, c.id)}>x</button>
             </div>
           </div>
         ))}

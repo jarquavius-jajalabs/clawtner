@@ -16,20 +16,36 @@ export function isAuthed(): boolean {
   return !!getToken();
 }
 
+export class OfflineError extends Error {
+  constructor() {
+    super("You're offline. Pull to refresh.");
+    this.name = 'OfflineError';
+  }
+}
+
 async function req(path: string, opts: RequestInit = {}): Promise<any> {
   const token = getToken();
-  const res = await fetch(`${BASE}${path}`, {
-    ...opts,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(opts.headers || {}),
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(opts.headers || {}),
+      },
+    });
+  } catch {
+    throw new OfflineError();
+  }
   if (res.status === 401) {
     clearToken();
     window.location.reload();
     throw new Error('Unauthorized');
+  }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+    throw new Error(data.error || `Request failed (${res.status})`);
   }
   return res.json();
 }

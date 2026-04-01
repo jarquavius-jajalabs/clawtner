@@ -21,12 +21,6 @@ const SUGGESTIONS: Record<string, string[]> = {
   communication: ['preferred_text_length', 'emoji_use', 'response_speed', 'pet_peeves'],
 };
 
-interface ProfileField {
-  category: string;
-  key: string;
-  value: string;
-}
-
 export default function SoulProfile({ contactId }: { contactId: string }) {
   const [profile, setProfile] = useState<Record<string, Record<string, string>>>({});
   const [loading, setLoading] = useState(true);

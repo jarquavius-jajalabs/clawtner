@@ -11,12 +11,14 @@ export default function CyclePage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    api.getContacts().then((res) => {
-      const contacts: Contact[] = res.contacts || [];
-      const p = contacts.find((c) => c.relationship === 'partner');
-      if (p) setPartner(p);
-      setLoading(false);
-    });
+    api.getContacts()
+      .then((res) => {
+        const contacts: Contact[] = res.contacts || [];
+        const p = contacts.find((c) => c.relationship === 'partner');
+        if (p) setPartner(p);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="loading">Loading...</div>;

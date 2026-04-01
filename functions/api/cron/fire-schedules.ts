@@ -169,7 +169,34 @@ function calculateNextFire(schedule: any): number {
 // This endpoint is called by Cloudflare Cron Trigger or manually
 // It checks for due schedules and generates drafts
 export const onRequestPost: PagesFunction<Env> = async (context) => {
+  try {
   const now = Math.floor(Date.now() / 1000);
+
+  // Rate limit: skip if last run was < 30 seconds ago
+  try {
+    const lastRun = await context.env.CLAWTNER_DB.prepare(
+      "SELECT value FROM kv_store WHERE key = 'last_cron_fire'"
+    ).first<{ value: string }>();
+    if (lastRun && (now - parseInt(lastRun.value)) < 30) {
+      return Response.json({ ok: true, skipped: true, reason: 'Rate limited (< 30s since last run)' });
+    }
+    // Update last run time (upsert)
+    await context.env.CLAWTNER_DB.prepare(
+      "INSERT INTO kv_store (key, value) VALUES ('last_cron_fire', ?) ON CONFLICT(key) DO UPDATE SET value = ?"
+    ).bind(String(now), String(now)).run();
+  } catch {
+    // kv_store table might not exist, create it
+    try {
+      await context.env.CLAWTNER_DB.prepare(
+        'CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT)'
+      ).run();
+      await context.env.CLAWTNER_DB.prepare(
+        "INSERT OR REPLACE INTO kv_store (key, value) VALUES ('last_cron_fire', ?)"
+      ).bind(String(now)).run();
+    } catch {
+      // Non-critical, proceed without rate limiting
+    }
+  }
 
   // Get all active schedules that are due
   const result = await context.env.CLAWTNER_DB.prepare(
@@ -248,4 +275,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     generated: generated.length,
     details: generated,
   });
+  } catch {
+    return Response.json({ error: 'Cron job failed' }, { status: 500 });
+  }
 };

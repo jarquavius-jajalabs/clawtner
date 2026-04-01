@@ -26,8 +26,8 @@ function LoginScreen() {
       } else {
         setError('Invalid PIN');
       }
-    } catch {
-      setError('Connection failed');
+    } catch (err: any) {
+      setError(err?.message || 'Connection failed');
     }
     setLoading(false);
   }

@@ -3,6 +3,36 @@ import { Draft, Gift, Contact } from '../lib/types';
 import * as api from '../lib/api';
 import { useSwipe } from '../hooks/useSwipe';
 
+function Toast({ message, type, onDismiss }: { message: string; type: 'success' | 'error' | 'info'; onDismiss: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 4000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  const colors = {
+    success: { bg: 'var(--green-soft)', color: 'var(--green)' },
+    error: { bg: 'var(--accent-soft)', color: 'var(--accent)' },
+    info: { bg: 'var(--surface)', color: 'var(--text-2)' },
+  };
+  const c = colors[type];
+
+  return (
+    <div style={{
+      background: c.bg,
+      border: `1px solid ${c.color}33`,
+      borderRadius: 'var(--radius)',
+      padding: '12px 16px',
+      marginBottom: 8,
+      fontSize: 13,
+      color: c.color,
+      fontWeight: 500,
+      animation: 'fadeIn 0.3s ease',
+    }}>
+      {message}
+    </div>
+  );
+}
+
 function FeedbackToast({
   draft,
   onFeedback,
@@ -97,8 +127,8 @@ function SwipeCard({
       {swipe.direction === 'left' && <div className="swipe-indicator reject">SKIP</div>}
       {children}
       <div className="swipe-hint">
-        <span>← skip</span>
-        <span>send →</span>
+        <span>&larr; skip</span>
+        <span>send &rarr;</span>
       </div>
     </div>
   );
@@ -111,66 +141,101 @@ export default function Queue() {
   const [editing, setEditing] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [feedbackDraft, setFeedbackDraft] = useState<Draft | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [d, g, c] = await Promise.all([
-      api.getDrafts('pending'),
-      api.getGifts('pending'),
-      api.getContacts(),
-    ]);
-    setDrafts(d.drafts || []);
-    setGifts(g.gifts || []);
-    const map: Record<string, Contact> = {};
-    (c.contacts || []).forEach((ct: Contact) => (map[ct.id] = ct));
-    setContacts(map);
+    setError('');
+    try {
+      const [d, g, c] = await Promise.all([
+        api.getDrafts('pending'),
+        api.getGifts('pending'),
+        api.getContacts(),
+      ]);
+      setDrafts(d.drafts || []);
+      setGifts(g.gifts || []);
+      const map: Record<string, Contact> = {};
+      (c.contacts || []).forEach((ct: Contact) => (map[ct.id] = ct));
+      setContacts(map);
+    } catch (e: any) {
+      if (e.name === 'OfflineError') {
+        setError("You're offline. Pull to refresh.");
+      } else {
+        setError('Failed to load queue. Try again.');
+      }
+    }
     setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
   async function handleApprove(draft: Draft) {
-    const wasEdited = editing === draft.id;
-    const msg = wasEdited ? editText : undefined;
-    await api.approveDraft(draft.id, msg);
-
-    // Log feedback: edited = auto thumbs_down vibe, otherwise show prompt
-    if (wasEdited) {
-      await api.createFeedback({
-        draft_id: draft.id,
-        contact_id: draft.contact_id,
-        reaction: 'edited',
-        original_message: draft.message,
-        edited_message: editText,
-      });
-    } else {
-      setFeedbackDraft(draft);
+    // Check if contact has a phone number
+    const contact = contacts[draft.contact_id];
+    if (contact && !contact.phone) {
+      setToast({ message: 'Add a phone number first', type: 'error' });
+      return;
     }
 
-    setEditing(null);
-    load();
+    const wasEdited = editing === draft.id;
+    const msg = wasEdited ? editText : undefined;
+    try {
+      await api.approveDraft(draft.id, msg);
+      setToast({ message: 'Message queued for send', type: 'success' });
+
+      if (wasEdited) {
+        await api.createFeedback({
+          draft_id: draft.id,
+          contact_id: draft.contact_id,
+          reaction: 'edited',
+          original_message: draft.message,
+          edited_message: editText,
+        });
+      } else {
+        setFeedbackDraft(draft);
+      }
+
+      setEditing(null);
+      load();
+    } catch {
+      setToast({ message: 'Failed to approve message', type: 'error' });
+    }
   }
 
   async function handleReject(id: string, draft: Draft) {
-    await api.rejectDraft(id);
-    await api.createFeedback({
-      draft_id: id,
-      contact_id: draft.contact_id,
-      reaction: 'thumbs_down',
-      original_message: draft.message,
-    });
-    load();
+    try {
+      await api.rejectDraft(id);
+      await api.createFeedback({
+        draft_id: id,
+        contact_id: draft.contact_id,
+        reaction: 'thumbs_down',
+        original_message: draft.message,
+      });
+      load();
+    } catch {
+      setToast({ message: 'Failed to skip message', type: 'error' });
+    }
   }
 
   async function handleGiftApprove(gift: Gift) {
-    await api.approveGift(gift.id, 'tok_mock_' + Date.now());
-    load();
+    try {
+      await api.approveGift(gift.id, 'tok_mock_' + Date.now());
+      setToast({ message: 'Gift approved', type: 'success' });
+      load();
+    } catch {
+      setToast({ message: 'Failed to approve gift', type: 'error' });
+    }
   }
 
   async function handleGiftReject(id: string) {
-    await api.rejectGift(id);
-    load();
+    try {
+      await api.rejectGift(id);
+      load();
+    } catch {
+      setToast({ message: 'Failed to reject gift', type: 'error' });
+    }
   }
 
   function handleFeedback(reaction: string) {
@@ -193,12 +258,26 @@ export default function Queue() {
     </div>
   );
 
+  if (error) return (
+    <div className="empty-state">
+      <div className="empty-icon">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="20" stroke="var(--accent)" strokeWidth="2"/>
+          <path d="M24 16v10" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round"/>
+          <circle cx="24" cy="32" r="1.5" fill="var(--accent)"/>
+        </svg>
+      </div>
+      <p>{error}</p>
+      <button className="btn-primary" onClick={load} style={{ marginTop: 12 }}>Retry</button>
+    </div>
+  );
+
   const items = [
     ...drafts.map((d) => ({ type: 'draft' as const, item: d, key: d.id })),
     ...gifts.map((g) => ({ type: 'gift' as const, item: g, key: g.id })),
   ].sort((a, b) => b.item.created_at - a.item.created_at);
 
-  if (items.length === 0 && !feedbackDraft) {
+  if (items.length === 0 && !feedbackDraft && !toast) {
     return (
       <div className="empty-state">
         <div className="empty-icon">
@@ -215,6 +294,10 @@ export default function Queue() {
 
   return (
     <div className="queue">
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />
+      )}
+
       {feedbackDraft && (
         <FeedbackToast
           draft={feedbackDraft}
@@ -287,7 +370,7 @@ export default function Queue() {
               Delivery: {(item as Gift).delivery_date}
             </div>
             {(item as Gift).message_card && (
-              <p className="card-message">"{(item as Gift).message_card}"</p>
+              <p className="card-message">&ldquo;{(item as Gift).message_card}&rdquo;</p>
             )}
           </SwipeCard>
         )

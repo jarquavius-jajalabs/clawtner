@@ -433,7 +433,9 @@ function HormoneChart({
   // Current day marker
   const dayX = padL + ((currentDay - 0.5) / cycleLength) * chartW;
 
-  const displayDay = hoveredDay ?? currentDay;
+  // displayDay can be used for hover tooltip display
+  const _displayDay = hoveredDay ?? currentDay;
+  void _displayDay;
 
   return (
     <div style={{
