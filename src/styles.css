@@ -1209,6 +1209,7 @@ body {
   letter-spacing: 0.4px;
 }
 
+.schedule-type-badge.type-once { background: var(--pink-soft); color: var(--pink); }
 .schedule-type-badge.type-daily { background: var(--green-soft); color: var(--green); }
 .schedule-type-badge.type-weekly { background: var(--accent-soft); color: var(--accent); }
 .schedule-type-badge.type-monthly { background: var(--purple-soft); color: var(--purple); }
@@ -1343,6 +1344,7 @@ body {
   transition: all 0.2s;
 }
 
+.schedule-type-btn.active.type-once { background: var(--pink); color: white; }
 .schedule-type-btn.active.type-daily { background: var(--green); color: white; }
 .schedule-type-btn.active.type-weekly { background: var(--accent); color: white; }
 .schedule-type-btn.active.type-monthly { background: var(--purple); color: white; }

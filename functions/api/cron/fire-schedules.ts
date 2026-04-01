@@ -261,10 +261,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     ).bind(draftId, schedule.contact_id, message, schedule.category || 'general', now).run();
 
     // Update schedule: last_fired and next_fire
-    const nextFire = calculateNextFire(schedule);
-    await context.env.CLAWTNER_DB.prepare(
-      'UPDATE schedules SET last_fired = ?, next_fire = ?, updated_at = unixepoch() WHERE id = ?'
-    ).bind(now, nextFire, schedule.id).run();
+    // One-time schedules get deactivated after firing
+    if (schedule.type === 'once') {
+      await context.env.CLAWTNER_DB.prepare(
+        'UPDATE schedules SET last_fired = ?, active = 0, updated_at = unixepoch() WHERE id = ?'
+      ).bind(now, schedule.id).run();
+    } else {
+      const nextFire = calculateNextFire(schedule);
+      await context.env.CLAWTNER_DB.prepare(
+        'UPDATE schedules SET last_fired = ?, next_fire = ?, updated_at = unixepoch() WHERE id = ?'
+      ).bind(now, nextFire, schedule.id).run();
+    }
 
     generated.push(`${schedule.contact_name}: ${schedule.name || schedule.category}`);
   }

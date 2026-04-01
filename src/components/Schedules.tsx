@@ -13,6 +13,7 @@ const CATEGORIES = [
 ];
 
 const TYPE_LABELS: Record<string, string> = {
+  once: 'Once',
   daily: 'Daily',
   weekly: 'Weekly',
   monthly: 'Monthly',
@@ -54,6 +55,7 @@ interface ScheduleFormData {
   name: string;
   type: string;
   time: string;
+  once_date: string;
   days_of_week: number[];
   day_of_month: number;
   month_day_month: number;
@@ -65,8 +67,9 @@ interface ScheduleFormData {
 const emptyForm: ScheduleFormData = {
   contact_id: '',
   name: '',
-  type: 'daily',
+  type: 'once',
   time: '09:00',
+  once_date: new Date().toISOString().split('T')[0],
   days_of_week: [],
   day_of_month: 1,
   month_day_month: 1,
@@ -117,6 +120,7 @@ export default function Schedules() {
       name: schedule.name || '',
       type: schedule.type,
       time: schedule.time,
+      once_date: schedule.type === 'once' && schedule.month_day ? schedule.month_day : new Date().toISOString().split('T')[0],
       days_of_week: dowArr,
       day_of_month: schedule.day_of_month || 1,
       month_day_month: mdMonth,
@@ -143,6 +147,9 @@ export default function Schedules() {
       prompt_context: form.prompt_context || undefined,
     };
 
+    if (form.type === 'once') {
+      payload.month_day = form.once_date;
+    }
     if (form.type === 'weekly') {
       payload.days_of_week = form.days_of_week.sort((a, b) => a - b).join(',');
     }
@@ -230,7 +237,7 @@ export default function Schedules() {
           <div className="form-section">
             <label>Type</label>
             <div className="schedule-type-picker">
-              {(['daily', 'weekly', 'monthly', 'yearly'] as const).map((t) => (
+              {(['once', 'daily', 'weekly', 'monthly', 'yearly'] as const).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -252,6 +259,18 @@ export default function Schedules() {
               required
             />
           </div>
+
+          {form.type === 'once' && (
+            <div className="form-section">
+              <label>Date</label>
+              <input
+                type="date"
+                value={form.once_date}
+                onChange={(e) => setForm({ ...form, once_date: e.target.value })}
+                required
+              />
+            </div>
+          )}
 
           {form.type === 'weekly' && (
             <div className="form-section">
@@ -363,6 +382,9 @@ export default function Schedules() {
                   <div className="schedule-card-meta">
                     <span className={`schedule-type-badge type-${s.type}`}>{TYPE_LABELS[s.type] || s.type}</span>
                     <span className="schedule-time">{formatTime(s.time)}</span>
+                    {s.type === 'once' && s.month_day && (
+                      <span className="schedule-days">{new Date(s.month_day + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    )}
                     {s.type === 'weekly' && s.days_of_week && (
                       <span className="schedule-days">{daysOfWeekDisplay(s.days_of_week)}</span>
                     )}

@@ -8,6 +8,13 @@ function calculateNextFire(schedule: any): number {
 
   today.setHours(hours, minutes, 0, 0);
 
+  // One-time schedule: use the specific date from month_day field
+  if (schedule.type === 'once' && schedule.month_day) {
+    const [year, month, day] = schedule.month_day.split('-').map(Number);
+    const onceDate = new Date(year, month - 1, day, hours, minutes, 0);
+    return Math.floor(onceDate.getTime() / 1000);
+  }
+
   if (today.getTime() <= nowMs) {
     if (schedule.type === 'daily') {
       today.setDate(today.getDate() + 1);
