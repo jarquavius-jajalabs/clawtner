@@ -108,7 +108,7 @@ export default function Contacts() {
       <div className="contact-list">
         {contacts.map((c) => (
           <div className="contact-card clickable" key={c.id} onClick={() => setSelected(c)}>
-            <div className="contact-avatar">{c.name.charAt(0).toUpperCase()}</div>
+            <div className={`contact-avatar ${c.relationship || ''}`}>{c.name.charAt(0).toUpperCase()}</div>
             <div className="contact-info">
               <strong>{c.name}</strong>
               {c.relationship && <span className="badge">{c.relationship}</span>}

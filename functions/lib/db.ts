@@ -13,4 +13,7 @@ export type Env = {
   STRIPE_PUBLISHABLE_KEY?: string;
   AUTH_PIN_HASH?: string;
   JWT_SECRET?: string;
+  TWILIO_ACCOUNT_SID?: string;
+  TWILIO_AUTH_TOKEN?: string;
+  TWILIO_FROM_NUMBER?: string;
 };

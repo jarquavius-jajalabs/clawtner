@@ -85,3 +85,21 @@ export const updateCycle = (id: string, data: any) => req(`/cycles/${id}`, { met
 // API Keys
 export const getApiKeys = () => req('/auth/keys');
 export const createApiKey = (name: string) => req('/auth/keys', { method: 'POST', body: JSON.stringify({ name }) });
+
+// Schedules
+export const getSchedules = (contactId?: string) => req(`/schedules${contactId ? `?contact_id=${contactId}` : ''}`);
+export const createSchedule = (data: any) => req('/schedules', { method: 'POST', body: JSON.stringify(data) });
+export const updateSchedule = (id: string, data: any) =>
+  req(`/schedules/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteSchedule = (id: string) => req(`/schedules/${id}`, { method: 'DELETE' });
+
+// Contact Profile
+export const getContactProfile = (contactId: string) => req(`/contacts/${contactId}/profile`);
+export const addProfileField = (contactId: string, data: { category: string; key: string; value: string }) =>
+  req(`/contacts/${contactId}/profile`, { method: 'POST', body: JSON.stringify(data) });
+export const deleteProfileField = (contactId: string, category: string, key?: string) =>
+  req(`/contacts/${contactId}/profile?category=${category}${key ? `&key=${key}` : ''}`, { method: 'DELETE' });
+
+// Messages
+export const sendMessage = (data: { draft_id?: string; contact_id?: string; message?: string }) =>
+  req('/messages/send', { method: 'POST', body: JSON.stringify(data) });

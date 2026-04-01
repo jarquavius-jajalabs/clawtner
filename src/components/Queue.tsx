@@ -185,7 +185,13 @@ export default function Queue() {
     }
   }
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) return (
+    <div className="queue">
+      <div className="skeleton skeleton-card" />
+      <div className="skeleton skeleton-card" />
+      <div className="skeleton skeleton-card" />
+    </div>
+  );
 
   const items = [
     ...drafts.map((d) => ({ type: 'draft' as const, item: d, key: d.id })),
@@ -195,8 +201,14 @@ export default function Queue() {
   if (items.length === 0 && !feedbackDraft) {
     return (
       <div className="empty-state">
-        <div className="empty-icon">✓</div>
+        <div className="empty-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" stroke="var(--border)" strokeWidth="2"/>
+            <path d="M16 24l6 6 10-12" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
         <p>All caught up</p>
+        <span className="empty-sub">No messages waiting for approval</span>
       </div>
     );
   }

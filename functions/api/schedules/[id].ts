@@ -2,28 +2,23 @@ import { Env } from '../../lib/db';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const id = context.params.id as string;
-  const contact = await context.env.CLAWTNER_DB.prepare(
-    'SELECT * FROM contacts WHERE id = ?'
+  const schedule = await context.env.CLAWTNER_DB.prepare(
+    'SELECT * FROM schedules WHERE id = ?'
   ).bind(id).first();
-  if (!contact) return Response.json({ error: 'Not found' }, { status: 404 });
 
-  const stats = await context.env.CLAWTNER_DB.prepare(
-    'SELECT COUNT(*) as total_sent FROM history WHERE contact_id = ?'
-  ).bind(id).first<{ total_sent: number }>();
-
-  return Response.json({ ...contact, total_sent: stats?.total_sent || 0 });
+  if (!schedule) return Response.json({ error: 'Not found' }, { status: 404 });
+  return Response.json(schedule);
 };
 
 export const onRequestPatch: PagesFunction<Env> = async (context) => {
   const id = context.params.id as string;
   const body = await context.request.json<Record<string, any>>();
 
+  // auto_approve deliberately excluded - ALWAYS 0, never changeable.
+  // Every message must be manually approved. Safety feature.
   const allowed = [
-    'name', 'phone', 'email', 'channel', 'relationship', 'tone',
-    'preferences', 'special_dates', 'address_line1', 'address_line2',
-    'city', 'state', 'zip', 'country', 'gift_preferences',
-    'love_language', 'love_language_secondary', 'convo_mode', 'convo_mode_escalation',
-    'birthday', 'anniversary',
+    'name', 'type', 'time', 'timezone', 'days_of_week', 'day_of_month',
+    'month_day', 'category', 'prompt_context', 'active'
   ];
 
   const updates: string[] = [];
@@ -32,7 +27,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
   for (const key of allowed) {
     if (body[key] !== undefined) {
       updates.push(`${key} = ?`);
-      const val = typeof body[key] === 'object' ? JSON.stringify(body[key]) : body[key];
+      const val = Array.isArray(body[key]) ? JSON.stringify(body[key]) : body[key];
       params.push(val);
     }
   }
@@ -45,7 +40,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
   params.push(id);
 
   await context.env.CLAWTNER_DB.prepare(
-    `UPDATE contacts SET ${updates.join(', ')} WHERE id = ?`
+    `UPDATE schedules SET ${updates.join(', ')} WHERE id = ?`
   ).bind(...params).run();
 
   return Response.json({ ok: true });
@@ -53,6 +48,8 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
 
 export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const id = context.params.id as string;
-  await context.env.CLAWTNER_DB.prepare('DELETE FROM contacts WHERE id = ?').bind(id).run();
+  await context.env.CLAWTNER_DB.prepare(
+    'DELETE FROM schedules WHERE id = ?'
+  ).bind(id).run();
   return Response.json({ ok: true });
 };

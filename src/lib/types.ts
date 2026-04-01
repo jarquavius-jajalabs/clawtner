@@ -111,4 +111,48 @@ export interface LearningStats {
   avg_response_time: number | null;
 }
 
+export interface Schedule {
+  id: string;
+  contact_id: string;
+  name?: string;
+  type: string;
+  time: string;
+  timezone: string;
+  days_of_week?: string;
+  day_of_month?: number;
+  month_day?: string;
+  category: string;
+  prompt_context?: string;
+  auto_approve: number;
+  active: number;
+  last_fired?: number;
+  next_fire?: number;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface ContactProfile {
+  id: string;
+  contact_id: string;
+  category: string;
+  key: string;
+  value: string;
+  created_at: number;
+}
+
+export interface MessageLog {
+  id: string;
+  history_id?: string;
+  twilio_sid?: string;
+  from_number?: string;
+  to_number?: string;
+  channel: string;
+  status: string;
+  error_code?: string;
+  error_message?: string;
+  price?: string;
+  created_at: number;
+  updated_at: number;
+}
+
 export type Tab = 'queue' | 'cycle' | 'contacts' | 'flowers' | 'history' | 'settings';
